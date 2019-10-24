@@ -92,8 +92,8 @@ public class CaesarCipher {
         return index;
     }
     
-    public String decrypt (String encrypted) {
-        // SUMMARY: Decrypts string by finding the letter with highest frequency and assuming it's "E"
+    public int getKey (String encrypted) {
+        // SUMMARY: Returns key used in Caesar Cipher encryption (assuming E is statistically most common letter)
         int[] letterCount = countLetters(encrypted);
         int maxIdx = maxIndex(letterCount);
         // Calculate the shift, assuming the letter with maxIdx is "E", which should be at idx 4 with no shift
@@ -101,8 +101,34 @@ public class CaesarCipher {
         if (maxIdx < 4) {
             decryptKey = 26 - (4 - maxIdx);
         }
+        return decryptKey;
+    }
+    
+    public String decrypt (String encrypted) {
+        // SUMMARY: Decrypts single-key string (assuming E is statistically most common letter)
+        int decryptKey = getKey(encrypted);
         String decryptedMessage = encrypt(encrypted, 26-decryptKey);
         return decryptedMessage;
+    }
+    
+    public String decryptTwoKeys (String encrypted) {
+        // SUMMARY: Decrypts string that has been encrypted using two different keys (on every other letter)
+        StringBuilder evenChars = new StringBuilder();
+        StringBuilder oddChars = new StringBuilder();
+        // Separate characters based on whether they were encrypted with key1 or key2
+        for (int i = 0; i < encrypted.length(); i++) {
+            if (i % 2 == 0) { // If even index
+                evenChars.append(encrypted.charAt(i));
+            } else { //If odd index
+                oddChars.append(encrypted.charAt(i));
+            }
+        }
+        // Find each key
+        int key1 = getKey(evenChars.toString());
+        int key2 = getKey(oddChars.toString());
+        // Decrypt message
+        String decrypted = encryptTwoKeys(encrypted, 26-key1, 26-key2);
+        return decrypted;
     }
     
     public void testCaesarEncrypt() {
@@ -126,12 +152,20 @@ public class CaesarCipher {
     }
     
     public void testCaesarDecrypt() {
+        // One key
         FileResource fr = new FileResource();
         String message = fr.asString();
         String encryptedMessage = encrypt(message, 4);
         System.out.println(encryptedMessage);
         String decrypted = decrypt(message);
         System.out.println(decrypted);
+        // Two keys
+        FileResource fr2 = new FileResource();
+        String message2 = fr2.asString();
+        String encryptedMessage2 = encryptTwoKeys(message2, 7, 9);
+        System.out.println(encryptedMessage2);
+        String decrypted2 = decryptTwoKeys(message2);
+        System.out.println(decrypted2);
     }
 }
 
