@@ -18,7 +18,7 @@ public class VigenereBreaker {
 
     public int[] tryKeyLength(String encrypted, int klength, char mostCommon) {
         int[] key = new int[klength];
-        // SUMMARY: Returns the shifts for each index in the key of known length (and message of known language)
+        // SUMMARY: Returns the shifts for each index in the key given length of key (and known language)
         for (int index = 0; index < klength; index ++){
             // For each character of the key, create a slice of the message shifted by that character 
             String messageSlice = sliceString(encrypted, index, klength);
@@ -31,25 +31,16 @@ public class VigenereBreaker {
     }
 
     public void breakVigenere () {
-        //WRITE YOUR CODE HERE
-    }
-    
-    
-    public void testVigenere() {
-        // Slice String
-        String slicedResult2 = sliceString("abcdefghijklm", 4, 5); // should return "ej"
-        String slicedResult1 = sliceString("abcdefghijklm", 0, 3); // should return "adgjm"
-        String slicedResult3 = sliceString("1234567", 0, 3);
-        System.out.println(slicedResult1);
-        System.out.println(slicedResult2);
-        System.out.println(slicedResult3);
-        // tryKeyLength
-        FileResource fr = new FileResource("./VigenereTestData/athens_keyflute.txt");
+        // SUMMARY: Uses breakVigenere methods to provide information to VigenereCipher class and allow message decryption
+        // Select a file to decrypt - currently only works for "athens_keyflute.txt"
+        FileResource fr = new FileResource();
         String message = fr.asString();
+        // Find message's key, if length is known and language is english
         int[] key = tryKeyLength(message, 5, 'e');
-        for (int ch : key) {
-            // Should print 5, 11, 20, 19, 4
-            System.out.println(ch);
-        }
+        // Create VigenereCipher object, pass it key, and have it decrypt the message
+        VigenereCipher vigenere = new VigenereCipher(key);
+        String decrypted = vigenere.decrypt(message);
+        System.out.println(decrypted);
     }
+    
 }
