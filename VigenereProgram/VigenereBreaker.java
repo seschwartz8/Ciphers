@@ -29,18 +29,61 @@ public class VigenereBreaker {
         }
         return key;
     }
+    
+    public HashSet<String> readDictionary(FileResource fr) {
+        // SUMMARY: Adds each line of file to a "dictionary" of lowercase words to be referenced as "real words"
+        HashSet<String> dictionary = new HashSet<String>();
+        // Read each line
+        for (String line : fr.lines()) {
+            dictionary.add(line.toLowerCase());
+        }
+        return dictionary;
+    }
+    
+    public int countRealWords(String message, HashSet<String> dictionary) {
+        // Splits a message into words and determine how many of them are "real words"
+        String[] splitWords = message.split("//W");
+        int wordCount = 0;
+        for (String word : splitWords) { // If word is in dictionary, count it
+            if (dictionary.contains(word.toLowerCase())){
+                wordCount ++;
+            }
+        }
+        return wordCount;
+    }
+    
+    public String breakForLanguage (String encrypted, HashSet<String> dictionary) {
+        // Tries key lengths to determine best key based on greatest number of "real words" in decrypted message
+        int highestWordCount = 0;
+        String decryptedMessage = "";
+        for (int length = 1; length <= encrypted.length(); length ++){
+            // Get potential key, for this trial key length
+            int[] key = tryKeyLength(encrypted, length, 'e');
+            // Use key to decrypt the message
+            VigenereCipher vigenere = new VigenereCipher(key);
+            String decrypted = vigenere.decrypt(encrypted);
+            // Count how many "real words" the decrypted message contains, based on user-selected dictionary
+            int wordCount = countRealWords(decrypted, dictionary);
+            // Keep track of key with most "real words"
+            if (wordCount > highestWordCount){
+                decryptedMessage = decrypted;
+            }
+        }
+        return decryptedMessage;
+    }
 
     public void breakVigenere () {
         // SUMMARY: Uses breakVigenere methods to provide information to VigenereCipher class and allow message decryption
-        // Select a file to decrypt - currently only works for "athens_keyflute.txt"
+        // Select a file to decrypt
         FileResource fr = new FileResource();
         String message = fr.asString();
-        // Find message's key, if length is known and language is english
-        int[] key = tryKeyLength(message, 5, 'e');
-        // Create VigenereCipher object, pass it key, and have it decrypt the message
-        VigenereCipher vigenere = new VigenereCipher(key);
-        String decrypted = vigenere.decrypt(message);
-        System.out.println(decrypted);
+        // Select dictionary of words to compare against
+        FileResource fr2 = new FileResource();
+        HashSet<String> dictionary = readDictionary(fr2);
+        // Decrypt English message of unknown key length
+        String decrypted = breakForLanguage(message, dictionary);
+        System.out.println(decrypted); 
+        // Should print "SCENE II. Athens. QUINCE'S house..." for "athens_keyflute.txt" and "English" dictionary
     }
     
 }
