@@ -4,7 +4,6 @@ public class CaesarCipher {
     public String encrypt(String input, int key) {
         //Make a StringBuilder with message (encrypted)
         StringBuilder encrypted = new StringBuilder(input);
-        //Write down the alphabet
         String alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         //Compute the shifted alphabet
         String shiftedAlphabet = alphabet.substring(key)+

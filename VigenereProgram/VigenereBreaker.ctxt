@@ -1,0 +1,12 @@
+#BlueJ class context
+comment0.target=VigenereBreaker
+comment0.text=\ WRITTEN\ BY\ SARAH\ SCHWARTZ,\ WITH\ HELPER\ CLASSES\ PROVIDED\ BY\ DUKE.\nPROGRAM\ DESIGNED\ TO\ BREAK\ A\ VIGENERE\ CIPHER
+comment1.params=message\ whichSlice\ totalSlices
+comment1.target=java.lang.String\ sliceString(java.lang.String,\ int,\ int)
+comment2.params=encrypted\ klength\ mostCommon
+comment2.target=int[]\ tryKeyLength(java.lang.String,\ int,\ char)
+comment3.params=
+comment3.target=void\ breakVigenere()
+comment4.params=
+comment4.target=void\ testVigenere()
+numComments=5
