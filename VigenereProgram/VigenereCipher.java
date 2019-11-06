@@ -1,5 +1,6 @@
 import edu.duke.*;
 import java.util.*;
+/*PROVIDED FOR USE BY DUKE*/
 
 public class VigenereCipher {
     CaesarCipher[] ciphers;

@@ -18,7 +18,15 @@ public class VigenereBreaker {
 
     public int[] tryKeyLength(String encrypted, int klength, char mostCommon) {
         int[] key = new int[klength];
-        //WRITE YOUR CODE HERE
+        // SUMMARY: Returns the shifts for each index in the key of known length (and message of known language)
+        for (int index = 0; index < klength; index ++){
+            // For each character of the key, create a slice of the message shifted by that character 
+            String messageSlice = sliceString(encrypted, index, klength);
+            // Get key shift for that slice, based on most common letter statistics
+            CaesarCracker caesarDecrypt = new CaesarCracker();
+            int sliceKey = caesarDecrypt.getKey(messageSlice);
+            key[index] = sliceKey;
+        }
         return key;
     }
 
@@ -35,5 +43,13 @@ public class VigenereBreaker {
         System.out.println(slicedResult1);
         System.out.println(slicedResult2);
         System.out.println(slicedResult3);
+        // tryKeyLength
+        FileResource fr = new FileResource("./VigenereTestData/athens_keyflute.txt");
+        String message = fr.asString();
+        int[] key = tryKeyLength(message, 5, 'e');
+        for (int ch : key) {
+            // Should print 5, 11, 20, 19, 4
+            System.out.println(ch);
+        }
     }
 }
