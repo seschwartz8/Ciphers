@@ -1,4 +1,5 @@
 import java.util.*;
+import java.io.File;
 import edu.duke.*;
 /* WRITTEN BY SARAH SCHWARTZ, WITH HELPER CLASSES PROVIDED BY DUKE.
    PROGRAM DESIGNED TO BREAK A VIGENERE CIPHER */
@@ -42,10 +43,10 @@ public class VigenereBreaker {
     
     public int countRealWords(String message, HashSet<String> dictionary) {
         // Splits a message into words and determine how many of them are "real words"
-        String[] splitWords = message.split("//W");
+        String[] splitWords = message.split("\\W+");
         int wordCount = 0;
-        for (String word : splitWords) { // If word is in dictionary, count it
-            if (dictionary.contains(word.toLowerCase())){
+        for (int i = 0; i < splitWords.length; i ++) { // If word is in dictionary, count it
+            if (dictionary.contains(splitWords[i].toLowerCase())){
                 wordCount ++;
             }
         }
@@ -53,12 +54,15 @@ public class VigenereBreaker {
     }
     
     public String breakForLanguage (String encrypted, HashSet<String> dictionary) {
-        // Tries key lengths to determine best key based on greatest number of "real words" in decrypted message
+        // Tries key lengths 1-100 to determine best key based on greatest number of "real words" in decrypted message
         int highestWordCount = 0;
         String decryptedMessage = "";
-        for (int length = 1; length <= encrypted.length(); length ++){
+        // Determine most common letter in dictionary
+        Character commonChar = mostCommonCharIn(dictionary);
+        // For all potential key lengths, decrypt message and count real words in it
+        for (int length = 1; length <= 100; length ++){
             // Get potential key, for this trial key length
-            int[] key = tryKeyLength(encrypted, length, 'e');
+            int[] key = tryKeyLength(encrypted, length, commonChar);
             // Use key to decrypt the message
             VigenereCipher vigenere = new VigenereCipher(key);
             String decrypted = vigenere.decrypt(encrypted);
@@ -66,9 +70,58 @@ public class VigenereBreaker {
             int wordCount = countRealWords(decrypted, dictionary);
             // Keep track of key with most "real words"
             if (wordCount > highestWordCount){
+                highestWordCount = wordCount;
                 decryptedMessage = decrypted;
             }
         }
+        return decryptedMessage;
+    }
+    
+    public Character mostCommonCharIn (HashSet<String> dictionary) {
+        // SUMMARY: Returns most common character in language that uses the English alphabet
+        String alphabet = "abcdefghijklmnopqrstuvwxyz";
+        CaesarCracker caesar = new CaesarCracker();
+        int[] finalCounts = new int[26];
+        // For every word in the dictionary
+        for (String word : dictionary) {
+            // Count frequency of each letter
+            int[] counts = caesar.countLetters(word);
+            // Add those counts to the final letter counts
+            for (int i = 0; i < counts.length; i++) {
+                finalCounts[i] = finalCounts[i] + counts[i];
+            }
+        }
+        // Determine highest letter count and return that character
+        int highestCount = 0;
+        int mostIndex = 0;
+        for (int i = 0; i < finalCounts.length; i++) {
+            if (finalCounts[i] > highestCount) {
+                highestCount = finalCounts[i];
+                mostIndex = i;
+            }
+        }
+        Character mostCommonChar = alphabet.charAt(mostIndex);
+        return mostCommonChar;
+    }
+    
+    public String breakForAllLangs (String encrypted, HashMap<String,HashSet<String>> languages){
+        int mostWords = 0;
+        String decryptedMessage = "";
+        String targetLanguage = "";
+        for (String language : languages.keySet()){
+            // Get corresponding dictionary for each language
+            HashSet<String> currentDictionary = languages.get(language);
+            // Create potential decryption
+            String currentDecrypted = breakForLanguage(encrypted, currentDictionary);
+            // Count "real words" in decryption
+            int currentWords = countRealWords(currentDecrypted, currentDictionary);
+            if (currentWords > mostWords) {
+                mostWords = currentWords;
+                decryptedMessage = currentDecrypted;
+                targetLanguage = language;
+            }
+        }
+        System.out.println("Target Language: " + targetLanguage);
         return decryptedMessage;
     }
 
@@ -77,13 +130,23 @@ public class VigenereBreaker {
         // Select a file to decrypt
         FileResource fr = new FileResource();
         String message = fr.asString();
-        // Select dictionary of words to compare against
-        FileResource fr2 = new FileResource();
-        HashSet<String> dictionary = readDictionary(fr2);
+        // Map possible dictionary languages to their contents for later comparison
+        DirectoryResource dr = new DirectoryResource();
+        HashMap<String,HashSet<String>> dictionaries = new HashMap<String,HashSet<String>>();
+        for (File f : dr.selectedFiles()){
+            // Save name of language (aka name of file)
+            String language = f.getName();
+            // Notify the user that the dictionary is being processed
+            System.out.println("Processing dictionaries...");
+            // Create a file resource of the current file to be used by readDictionary
+            FileResource fr2 = new FileResource(f);
+            HashSet<String> dictionary = readDictionary(fr2);
+            // Add language and its words to the map of dictionaries
+            dictionaries.put(language, dictionary);
+        }
         // Decrypt English message of unknown key length
-        String decrypted = breakForLanguage(message, dictionary);
-        System.out.println(decrypted); 
-        // Should print "SCENE II. Athens. QUINCE'S house..." for "athens_keyflute.txt" and "English" dictionary
+        String decrypted = breakForAllLangs(message, dictionaries);
+        System.out.println("DECRYPTED MESSAGE: " + decrypted);
     }
     
 }
