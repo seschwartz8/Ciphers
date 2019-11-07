@@ -1,5 +1,4 @@
 import edu.duke.*;
-/*PROVIDED FOR USE BY DUKE*/
 
 public class CaesarCracker {
     char mostCommon;

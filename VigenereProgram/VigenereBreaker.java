@@ -23,8 +23,9 @@ public class VigenereBreaker {
         for (int index = 0; index < klength; index ++){
             // For each character of the key, create a slice of the message shifted by that character 
             String messageSlice = sliceString(encrypted, index, klength);
+            // Create CaesarCracker and pass it the language's most common letter
+            CaesarCracker caesarDecrypt = new CaesarCracker(mostCommon);
             // Get key shift for that slice, based on most common letter statistics
-            CaesarCracker caesarDecrypt = new CaesarCracker();
             int sliceKey = caesarDecrypt.getKey(messageSlice);
             key[index] = sliceKey;
         }
